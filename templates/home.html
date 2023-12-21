@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trumble Weather Dashboard</title>
+    <!-- [rest of the head content] -->
+</head>
+<body>
+    <div class="container">
+        <!-- Current Weather Section -->
+        <div class="forecast-item">
+            <h2>Current Weather</h2>
+            <p>Temperature: <span class="temp">{{ current_weather.temp }}°F</span></p>
+            <p>Condition: {{ current_weather.condition }}</p>
+        </div>
+        <div class="weekly_container">
+            <h2>7-Day Weather Forecast</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Temperature Trend</th>
+                        <th>Wind Speed</th>
+                        <th>Wind Direction</th>
+                        <th>Icon</th>
+                        <th>Short Forecast</th>
+                        <th>Detailed Forecast</th>
+                        <th>Day Temperature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in weekly_forecast %}
+                    <tr>
+                        <td>{{ day.name }}</td>
+                        <td>{{ day.temperatureTrend }}</td>
+                        <td>{{ day.windSpeed }}</td>
+                        <td>{{ day.windDirection }}</td>
+                        <td><img src="{{ day.icon }}" alt="Weather Icon"></td>
+                        <td>{{ day.shortForecast }}</td>
+                        <td>{{ day.detailedForecast }}</td>
+                        <td>{{ day.dayTemp }}°{{ day.temperatureUnit }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Canvas Element for Chart.js -->
+        <div class="chart-container">
+            <canvas id="weatherChart"></canvas>
+        </div>
+
+        <!-- Chart.js Script -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            var ctx = document.getElementById('weatherChart').getContext('2d');
+            var weatherChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ weekly_forecast|map(attribute='name')|list|tojson }},
+                    datasets: [{
+                        label: 'Daily Temperatures',
+                        data: {{ weekly_forecast|map(attribute='dayTemp')|list|tojson }},
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Temperature (°F)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day of the Week'
+                            }
+                        }
+                    }
+                }
+            });
+        </script>        
+    </div>
+</body>
+</html>
